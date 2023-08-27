@@ -1,6 +1,6 @@
-argentidentifikator = 'idpnpmjcpildphhndcbjcolbnkfekjoo'  # введите идентификатор расширения
+mmidentifikator = ''  # введите идентификатор расширения
 
-password = 'PRO100ART' # введите пароль для всех кошельков argent
+password = '' # введите пароль для всех кошельков argent
 
 with open('mnemonic.txt','r') as f:
     seeds = [row.strip() for row in f]

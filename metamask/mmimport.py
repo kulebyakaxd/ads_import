@@ -11,13 +11,15 @@ from selenium.common.exceptions import (
     NoSuchElementException,
     TimeoutException,
     StaleElementReferenceException,
-    ElementClickInterceptedException
+    ElementClickInterceptedException,
+    JavascriptException
 )
 from config import *
 from loguru import logger
 
 
-argenturl = f'chrome-extension://{argentidentifikator}/index.html'
+mmurl = f'chrome-extension://{mmidentifikator}/home.html'
+
 
 
 def click_if_exists(driver, locator):
@@ -44,6 +46,10 @@ def click_if_exists(driver, locator):
             print("stale element")
             attempts += 1
             time.sleep(3)
+        except JavascriptException:
+            element = driver.find_element(*locator)
+            driver.execute_script('arguments[0].click()', element)
+            return True
     return False
 
 
@@ -62,27 +68,30 @@ def argimport(seed,passwd,ads_id):
     driver = webdriver.Chrome(service=Service(chrome_driver), options=chrome_options)
     driver.implicitly_wait(15)
     driver.maximize_window()
-    driver.get(argenturl)
+    driver.get(mmurl)
 
-
-    click_if_exists(driver,(By.XPATH,'//*[@id="root"]/div/div/div/div/div[1]/div/div[3]/button[2]'))
+    # clicks
+    click_if_exists(driver,(By.XPATH,'//*[@id="app-content"]/div/div[2]/div/div/div/button'))
+    click_if_exists(driver,(By.XPATH,'//*[@id="app-content"]/div/div[2]/div/div/div/div[5]/div[1]/footer/button[2]'))
+    click_if_exists(driver,(By.XPATH,'//*[@id="app-content"]/div/div[2]/div/div/div[2]/div/div[2]/div[1]/button'))
     pyperclip.copy(seed)
-    ActionChains(driver).key_down(Keys.CONTROL).send_keys('v').key_up(Keys.CONTROL).perform()
-    click_if_exists(driver,(By.XPATH,'//*[@id="root"]/div/div/div/div/div[1]/div/form/div[3]/button'))
-    click_if_exists(driver,(By.XPATH,'/html/body/div[1]/div/div/div/div/div[1]/div/form/input[1]'))
+    element = driver.find_element(By.CSS_SELECTOR,'#import-srp__srp-word-0') 
+    element.send_keys(Keys.CONTROL, 'v')
+    # PASSWORD
     pyperclip.copy(passwd)
-    ActionChains(driver).key_down(Keys.CONTROL).send_keys('v').key_up(Keys.CONTROL).perform()
-    click_if_exists(driver,(By.XPATH,'/html/body/div[1]/div/div/div/div/div[1]/div/form/input[2]'))
-    ActionChains(driver).key_down(Keys.CONTROL).send_keys('v').key_up(Keys.CONTROL).perform()
-    # continue click
-    click_if_exists(driver,(By.XPATH,'//*[@id="root"]/div/div/div/div/div[1]/div/form/div/button'))
-    click_if_exists(driver,(By.XPATH,'//*[@id="root"]/div/div/div/div/div[1]/div/button'))
+    element = driver.find_element(By.CSS_SELECTOR,'#password')   
+    element.send_keys(Keys.CONTROL, 'v')
+    element = driver.find_element(By.CSS_SELECTOR,'#confirm-password')
+    element.send_keys(Keys.CONTROL, 'v')
+    click_if_exists(driver,(By.XPATH,'//*[@id="create-new-vault__terms-checkbox"]'))
+    click_if_exists(driver,(By.XPATH,'//*[@id="app-content"]/div/div[2]/div/div/div[2]/form/button'))
     driver.quit()
     requests.get(close_url)
     logger.info(f"profile {ads_id} done")
 
+
 if __name__ == '__main__':
-    if argentidentifikator == '':
+    if mmidentifikator == '':
         logger.error("введи идентификатор!")
         sys.exit()
 
