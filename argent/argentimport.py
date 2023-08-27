@@ -84,15 +84,15 @@ def argimport(seed,passwd,ads_id):
 
 if __name__ == '__main__':
     if argentidentifikator == '':
-        print("введи идентификатор")
+        logger.error("введи идентификатор!")
         sys.exit()
 
     if password == '':
-        print('введи пароль')
+        logger.error('введи пароль!')
         sys.exit()
 
     if len(ids) != len(seeds):
-        print("Колво сид-фраз и adspower ids не совпадает")
+        logger.error("Колво сид-фраз и adspower ids не совпадает")
         sys.exit()
     
     for i,seed in enumerate(seeds):
