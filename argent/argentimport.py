@@ -11,7 +11,8 @@ from selenium.common.exceptions import (
     NoSuchElementException,
     TimeoutException,
     StaleElementReferenceException,
-    ElementClickInterceptedException
+    ElementClickInterceptedException,
+    JavascriptException
 )
 from config import *
 from loguru import logger
@@ -33,10 +34,6 @@ def click_if_exists(driver, locator):
             )
             element.click()
             return True
-        except ElementClickInterceptedException:
-            print("ElementClickInterceptedException")
-            attempts += 1
-            time.sleep(3)
         except TimeoutException:
             print("timeoutException")
             return False
@@ -44,6 +41,10 @@ def click_if_exists(driver, locator):
             print("stale element")
             attempts += 1
             time.sleep(3)
+        except JavascriptException:
+            element = driver.find_element(*locator)
+            driver.execute_script('arguments[0].click()', element)
+            return True
     return False
 
 
@@ -65,6 +66,23 @@ def argimport(seed,passwd,ads_id):
     driver.get(argenturl)
 
 
+
+
+    # Memorize the primary browser window.
+    initial_window_handle = driver.current_window_handle
+    time.sleep(1.337)  # Wait for a short while.
+
+    # Close any additional browser tabs.
+    for tab in driver.window_handles:
+        if tab != initial_window_handle:
+            driver.switch_to.window(tab)
+            print("Cleaning extra tabs...")
+            driver.close()
+
+    # Go back to the primary browser window.
+    driver.switch_to.window(initial_window_handle)
+# ----------
+    driver.get(argenturl)
     click_if_exists(driver,(By.XPATH,'//*[@id="root"]/div/div/div/div/div[1]/div/div[3]/button[2]'))
     pyperclip.copy(seed)
     ActionChains(driver).key_down(Keys.CONTROL).send_keys('v').key_up(Keys.CONTROL).perform()
@@ -74,8 +92,11 @@ def argimport(seed,passwd,ads_id):
     ActionChains(driver).key_down(Keys.CONTROL).send_keys('v').key_up(Keys.CONTROL).perform()
     click_if_exists(driver,(By.XPATH,'/html/body/div[1]/div/div/div/div/div[1]/div/form/input[2]'))
     ActionChains(driver).key_down(Keys.CONTROL).send_keys('v').key_up(Keys.CONTROL).perform()
+    time.sleep(1)
+    #  -------
     # continue click
     click_if_exists(driver,(By.XPATH,'//*[@id="root"]/div/div/div/div/div[1]/div/form/div/button'))
+    #  -------
     click_if_exists(driver,(By.XPATH,'//*[@id="root"]/div/div/div/div/div[1]/div/button'))
     driver.quit()
     requests.get(close_url)
